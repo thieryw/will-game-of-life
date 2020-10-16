@@ -1,31 +1,29 @@
 import React, { Component } from 'react';
 import { render } from 'react-dom';
-import Hello from './Hello';
 import './style.css';
+import {useAsync} from "react-async-hook";
+import {Store, getStore} from "./logic";
 
-interface AppProps { }
-interface AppState {
-  name: string;
+import {App} from "./App";
+
+
+const Switcher: React.FunctionComponent<{width: number; height: number}> = (props)=>{
+  
+  const asyncGetStore = useAsync(getStore, [props]);
+  
+  
+  return(
+    <div>
+
+      {
+        asyncGetStore.loading ? <h1>Loading...</h1> : <App store={asyncGetStore.result} />
+      }
+
+    </div>
+  )
 }
 
-class App extends Component<AppProps, AppState> {
-  constructor(props) {
-    super(props);
-    this.state = {
-      name: 'React'
-    };
-  }
 
-  render() {
-    return (
-      <div>
-        <Hello name={this.state.name} />
-        <p>
-          Start editing to see some magic happen :)
-        </p>
-      </div>
-    );
-  }
-}
 
-render(<App />, document.getElementById('root'));
+
+render(<Switcher width={20} height={20} />, document.getElementById('root'));
