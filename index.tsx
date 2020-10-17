@@ -18,7 +18,7 @@ const Switcher: React.FunctionComponent = ()=>{
 
       {
         asyncGetStore.loading ? <h1>Loading...</h1> : 
-        <div className="wrapper"><App store={asyncGetStore.result} /></div>
+        <App store={asyncGetStore.result} />
       }
 
     </div>

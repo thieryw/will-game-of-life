@@ -4,30 +4,82 @@ export type Coordinates = {
   x: number;
   y: number;
 }
-type Cell = "dead" | "alive";
+type CellState = "dead" | "alive";
 
-type Dimentions = {
-  width: number;
-  height: number;
-}
 
-export const dimentions: Dimentions = {
+export const dimentions = {
   "width": 20,
   "height": 20
 }
 
 export type Store = {
   
-  setCellState: (params: {cell: Cell; coordinates: Coordinates}) => Promise<void>;
+  changeCellState: (coordinates: Coordinates) => Promise<void>;
   runGame: () => void;
-  getCellAtCoord: (coordinates: Coordinates) => Cell;
+  getCellAtCoord: (coordinates: Coordinates) => CellState;
   cleanGrid: ()=> Promise<void>;
   
 
-  evtGridCleaned: NonPostableEvt<Cell[][]>;
-  evtCellStateSet: NonPostableEvt<Parameters<Store["setCellState"]>[0]>;
+  evtGridCleaned: NonPostableEvt<CellState[][]>;
+  evtCellStateChanged: NonPostableEvt<Coordinates>;
 
 };
+
+function getAllCellsInContactWithCell(params: {coordinates: Coordinates; cells: CellState[][]}): CellState[]{
+  
+  const {coordinates, cells} = params;
+  
+  const result: CellState[] = [];
+
+  result.push(cells[coordinates.x - 1][coordinates.y - 1]);
+  result.push(cells[coordinates.x - 1][coordinates.y]);
+  result.push(cells[coordinates.x - 1][coordinates.y + 1]);
+  result.push(cells[coordinates.x][coordinates.y - 1]);
+  result.push(cells[coordinates.x][coordinates.y + 1]);
+  result.push(cells[coordinates.x + 1][coordinates.y - 1]);
+  result.push(cells[coordinates.x + 1][coordinates.y]);
+  result.push(cells[coordinates.x + 1][coordinates.y + 1]);
+
+
+  
+
+
+
+
+
+  return result;
+}
+
+
+function getNextCellState(params: {coordinates: Coordinates; cells: CellState[][]}): CellState{
+  const {coordinates, cells} = params;
+  const isOnEdge: boolean = coordinates.x === 0 || coordinates.x === dimentions.width - 1 ||
+                            coordinates.y === 0 || coordinates.y === dimentions.height - 1;
+  
+  let result: CellState;
+  let numberOfLiveCellsInContact = 0;
+  if(isOnEdge){
+    return "dead";
+  }
+  const cellsInContact = getAllCellsInContactWithCell(params);
+
+  cellsInContact.forEach(cell => {
+    if(cell === "alive"){
+      numberOfLiveCellsInContact++;
+    }
+  });
+
+
+  switch(cells[coordinates.x][coordinates.y]){
+    case "alive" : result = numberOfLiveCellsInContact < 2 || numberOfLiveCellsInContact > 3 ? 
+                            "dead" : "alive"; break;
+    
+    case "dead" : result = numberOfLiveCellsInContact === 3 ? "alive" : "dead"; break;
+  }
+
+  return result;
+
+}
 
 
 export async function getStore(): Promise<Store>{
@@ -36,7 +88,7 @@ export async function getStore(): Promise<Store>{
     return new Promise<void>(resolve => setTimeout(resolve, delay));
   }
   
-  const cells: Cell[][] = [[]];
+  const cells: CellState[][] = [[]];
   for(let x = 0; x < dimentions.width; x++){
       cells.push([]);
     for(let y = 0; y < dimentions.height; y++){
@@ -57,24 +109,41 @@ export async function getStore(): Promise<Store>{
 
     },
     "getCellAtCoord": coordinates => cells[coordinates.x][coordinates.y],
-    "setCellState": async params =>{
+    "changeCellState": async coordinates =>{
       
       await simulateNetworkDelay(300);
       
-      const {coordinates, cell} = params
-      cells[coordinates.x][coordinates.y] = cell;
+      const cell = store.getCellAtCoord(coordinates);
+      
+      cells[coordinates.x][coordinates.y] = cell === "alive" ? "dead" : "alive";
 
-      store.evtCellStateSet.post(params);
+      store.evtCellStateChanged.post(coordinates);
 
 
 
 
     },
     "runGame": ()=>{
-      console.log("game runing");
+      const changedCells: {cellState: CellState; coordinates: Coordinates}[] = [];
+      
+      cells.forEach((line, x) => line.forEach((cell, y) =>{
+        
+        const nextCellState = getNextCellState({"cells": cells, "coordinates": {x,y}});
+        
+        if(nextCellState !== cell){
+
+         changedCells.push({"cellState": nextCellState, "coordinates": {x,y}});
+        }
+      }));
+
+
+      changedCells.forEach(cell => {
+        cells[cell.coordinates.x][cell.coordinates.y] = cell.cellState;
+        store.evtCellStateChanged.post(cell.coordinates);
+      });
     },
 
-    "evtCellStateSet": new Evt(),
+    "evtCellStateChanged": new Evt(),
     "evtGridCleaned": new Evt()
   };
 

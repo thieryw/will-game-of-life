@@ -1,4 +1,4 @@
-import React, { Component, useCallback, useReducer } from 'react';
+import React, { Component, useCallback, useReducer, useMemo } from 'react';
 import { render } from 'react-dom';
 import './style.css';
 import {useAsync} from "react-async-hook";
@@ -8,29 +8,43 @@ import {Evt} from "evt";
 import {Cell} from "./Cell";
 import {dimentions} from "./logic";
 
-const coordX: number[] = [];
-const coordY: number[] = [];
 
-for(const x of [1,2]){
-  for(let coord = 0; coord < dimentions.width; coord++){
-    x === 1 ? coordX.push(coord) : coordY.push(coord);
-  }
-}
-
-
-Evt.prototype.setMaxHandlers(400);
-Evt.setDefaultMaxHandlers(400);
 
 export const App: React.FunctionComponent<{
   store: Store;
 }> = (props)=>{
   const {store} = props;
-  return (
-    <div className="cells">
-      {
-        coordX.map(x => coordY.map(y => <Cell key={`${x}${y}`} coordinates={{x,y}} store={store} />))
+
+  const allCoordinates = useMemo(()=>{
+    const out: Coordinates[] = [];
+
+    for(let x = 0; x < dimentions.width; x++){
+      for(let y = 0; y < dimentions.height; y++){
+        out.push({x,y});
       }
+    }
     
+
+    return out;
+  },[])
+
+  return (
+    <div className="wrapper">
+      <h1>Game of Life</h1>
+      <div className="cells">
+        {
+          allCoordinates.map(coordinates => <Cell key={JSON.stringify(coordinates)} 
+          coordinates={coordinates} 
+          store={store} 
+          />)
+        }
+      </div>
+      
+      <input className="next" 
+        type="button" 
+        value="next Cycle" 
+        onClick={useCallback(()=> store.runGame(),[store])} 
+      />
     </div>
   )
 }

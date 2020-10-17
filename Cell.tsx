@@ -5,14 +5,15 @@ import {useAsync} from "react-async-hook";
 import {Store, Coordinates} from "./logic";
 import {useEvt} from "evt/hooks";
 import {Evt} from "evt";
+import { same } from "evt/tools/inDepth";
 
 
 export const Cell: React.FunctionComponent<{
   coordinates: Coordinates;
   store: Pick<Store,
     "getCellAtCoord" |
-    "setCellState" |
-    "evtCellStateSet" 
+    "changeCellState" |
+    "evtCellStateChanged" 
   >
 }> = (props)=>{
 
@@ -20,19 +21,16 @@ export const Cell: React.FunctionComponent<{
   const [, forceUpdate] = useReducer(x=>x+1, 0);
 
   const handleClick = useCallback(()=>{
-    store.setCellState({
-      "cell": store.getCellAtCoord(coordinates) === "alive" ? "dead" : "alive",
-      "coordinates": {
-        "x": coordinates.x,
-        "y": coordinates.y
-      }
+    store.changeCellState({
+      "x": coordinates.x,
+      "y": coordinates.y
     })
   },[store])
 
   useEvt(ctx =>{
-    store.evtCellStateSet.attach(
-      data => data.coordinates.x === coordinates.x && data.coordinates.y === coordinates.y,
-      ctx,
+    store.evtCellStateChanged.attach(
+      coordinates => same(coordinates, props.coordinates),
+      ctx, 
       ()=> forceUpdate()
 
     );
