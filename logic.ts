@@ -1,6 +1,6 @@
 import {NonPostableEvt, ToPostableEvt, Evt} from "evt";
 
-type Coordinates = {
+export type Coordinates = {
   x: number;
   y: number;
 }

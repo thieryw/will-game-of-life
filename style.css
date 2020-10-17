@@ -1,3 +1,24 @@
 h1, p {
   font-family: Lato;
 }
+
+.cells{
+  display: grid;
+  grid-template-columns: repeat(30, 1fr);
+  grid-gap: 1px;
+  background-color: black;
+  border: black solid 1px;
+}
+
+.cell{
+ 
+  height: 10px;
+}
+
+.dead{
+  background-color: white;
+}
+
+.alive{
+  background-color: green;
+}

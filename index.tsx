@@ -7,6 +7,7 @@ import {Store, getStore} from "./logic";
 import {App} from "./App";
 
 
+
 const Switcher: React.FunctionComponent<{width: number; height: number}> = (props)=>{
   
   const asyncGetStore = useAsync(getStore, [props]);
@@ -26,4 +27,4 @@ const Switcher: React.FunctionComponent<{width: number; height: number}> = (prop
 
 
 
-render(<Switcher width={20} height={20} />, document.getElementById('root'));
+render(<Switcher width={30} height={30} />, document.getElementById('root'));
