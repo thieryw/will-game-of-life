@@ -5,18 +5,21 @@ import {useAsync} from "react-async-hook";
 import {Store, Coordinates} from "./logic";
 import {useEvt} from "evt/hooks";
 import {Evt} from "evt";
+import {Cell} from "./Cell";
+import {dimentions} from "./logic";
 
 const coordX: number[] = [];
 const coordY: number[] = [];
 
 for(const x of [1,2]){
-  for(let coord = 0; coord < 30; coord++){
+  for(let coord = 0; coord < dimentions.width; coord++){
     x === 1 ? coordX.push(coord) : coordY.push(coord);
   }
 }
 
 
-
+Evt.prototype.setMaxHandlers(400);
+Evt.setDefaultMaxHandlers(400);
 
 export const App: React.FunctionComponent<{
   store: Store;
@@ -33,45 +36,3 @@ export const App: React.FunctionComponent<{
 }
 
 
-const Cell: React.FunctionComponent<{
-  coordinates: Coordinates;
-  store: Pick<Store,
-    "getCellAtCoord" |
-    "setCellState" |
-    "evtCellStateSet" 
-  >
-}> = (props)=>{
-
-  const {store, coordinates} = props;
-  const [, forceUpdate] = useReducer(x=>x+1, 0);
-
-  const handleClick = useCallback(()=>{
-    store.setCellState({
-      "cell": store.getCellAtCoord(coordinates) === "alive" ? "dead" : "alive",
-      "coordinates": {
-        "x": coordinates.x,
-        "y": coordinates.y
-      }
-    })
-  },[store])
-
-  useEvt(ctx =>{
-    store.evtCellStateSet.attach(
-      data => data.coordinates.x === coordinates.x && data.coordinates.y === coordinates.y,
-      ctx,
-      ()=> forceUpdate()
-
-    );
-
-  },[store])
-  
-  return(
-    <div 
-      className={`cell ${store.getCellAtCoord(coordinates)}`}
-      onClick={handleClick}
-    >
-
-
-    </div>
-  )
-}

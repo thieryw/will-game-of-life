@@ -8,16 +8,17 @@ import {App} from "./App";
 
 
 
-const Switcher: React.FunctionComponent<{width: number; height: number}> = (props)=>{
+const Switcher: React.FunctionComponent = ()=>{
   
-  const asyncGetStore = useAsync(getStore, [props]);
+  const asyncGetStore = useAsync(getStore, []);
   
   
   return(
     <div>
 
       {
-        asyncGetStore.loading ? <h1>Loading...</h1> : <App store={asyncGetStore.result} />
+        asyncGetStore.loading ? <h1>Loading...</h1> : 
+        <div className="wrapper"><App store={asyncGetStore.result} /></div>
       }
 
     </div>
@@ -27,4 +28,4 @@ const Switcher: React.FunctionComponent<{width: number; height: number}> = (prop
 
 
 
-render(<Switcher width={30} height={30} />, document.getElementById('root'));
+render(<Switcher />, document.getElementById('root'));

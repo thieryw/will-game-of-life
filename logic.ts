@@ -6,6 +6,15 @@ export type Coordinates = {
 }
 type Cell = "dead" | "alive";
 
+type Dimentions = {
+  width: number;
+  height: number;
+}
+
+export const dimentions: Dimentions = {
+  "width": 20,
+  "height": 20
+}
 
 export type Store = {
   
@@ -21,16 +30,16 @@ export type Store = {
 };
 
 
-export async function getStore(params : {width: number; height: number}): Promise<Store>{
+export async function getStore(): Promise<Store>{
   
   const simulateNetworkDelay = (delay: number)=>{
     return new Promise<void>(resolve => setTimeout(resolve, delay));
   }
   
   const cells: Cell[][] = [[]];
-  for(let x = 0; x < params.width; x++){
+  for(let x = 0; x < dimentions.width; x++){
       cells.push([]);
-    for(let y = 0; y < params.height; y++){
+    for(let y = 0; y < dimentions.height; y++){
       cells[x].push("dead");
     };
   };
