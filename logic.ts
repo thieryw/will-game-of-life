@@ -31,17 +31,16 @@ function getAllCellsInContactWithCell(params: {coordinates: Coordinates; cells: 
   
   const result: CellState[] = [];
 
-  result.push(cells[coordinates.x - 1][coordinates.y - 1]);
-  result.push(cells[coordinates.x - 1][coordinates.y]);
-  result.push(cells[coordinates.x - 1][coordinates.y + 1]);
-  result.push(cells[coordinates.x][coordinates.y - 1]);
-  result.push(cells[coordinates.x][coordinates.y + 1]);
-  result.push(cells[coordinates.x + 1][coordinates.y - 1]);
-  result.push(cells[coordinates.x + 1][coordinates.y]);
-  result.push(cells[coordinates.x + 1][coordinates.y + 1]);
-
-
   
+
+  for(const n of [-1, 0, 1]){
+    result.push(cells[coordinates.x - 1][coordinates.y + n]);
+    result.push(cells[coordinates.x + 1][coordinates.y + n]);
+  };
+
+  for(const n of [-1, 1]){
+    result.push(cells[coordinates.x][coordinates.y + n]);
+  }
 
 
 
