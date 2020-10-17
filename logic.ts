@@ -36,11 +36,13 @@ function getAllCellsInContactWithCell(params: {coordinates: Coordinates; cells: 
   for(const n of [-1, 0, 1]){
     result.push(cells[coordinates.x - 1][coordinates.y + n]);
     result.push(cells[coordinates.x + 1][coordinates.y + n]);
+
+    if(n === -1 || n === 1){
+      result.push(cells[coordinates.x][coordinates.y + n])
+    }
   };
 
-  for(const n of [-1, 1]){
-    result.push(cells[coordinates.x][coordinates.y + n]);
-  }
+
 
 
 
