@@ -1,4 +1,5 @@
 import {NonPostableEvt, ToPostableEvt, Evt} from "evt";
+import { Cell } from "./Cell";
 
 export type Coordinates = {
   x: number;
@@ -34,30 +35,57 @@ function getAllCellsInContactWithCell(params: {coordinates: Coordinates; cells: 
   
   const {coordinates, cells} = params;
   
-  const result: CellState[] = [];
+  //100% spagety
 
+  const getCellsInContact = (
+    params: {yAbove: number, yBeneath: number, xLeft: number, xRight: number}
+  )=>{
+    const result: CellState[] = [];
+    const {yAbove, yBeneath, xLeft, xRight} = params;
+    for(const n of [yAbove, 0, yBeneath]){
+      result.push(cells[coordinates.x + xLeft][coordinates.y + n]);
+      result.push(cells[coordinates.x + xRight][coordinates.y + n]);
+
+      if(n === yAbove || n === yBeneath){
+        result.push(cells[coordinates.x][coordinates.y + n]);
+      }
+    };
+
+    return result;
+  }
+
+  /*if(coordinates.x === 0){
+    if(coordinates.y === 0){
+            
+      return getCellsInContact(
+        {"xLeft": 1, "xRight": dimentions.width, "yAbove": 1, "yBeneath": dimentions.height}
+      );
+    }
+
+    if(coordinates.y === dimentions.height - 1){
+
+      return getCellsInContact(
+        {"xLeft": 1, "xRight": dimentions.width, "yAbove": 1, "yBeneath": -dimentions.height}
+      );
+    }
+
+
+  }*/
   
 
-  for(const n of [-1, 0, 1]){
-    result.push(cells[coordinates.x - 1][coordinates.y + n]);
-    result.push(cells[coordinates.x + 1][coordinates.y + n]);
+  return getCellsInContact(
+        {"xLeft": -1, "xRight": 1, "yAbove": -1, "yBeneath": 1}
+      );
 
-    if(n === -1 || n === 1){
-      result.push(cells[coordinates.x][coordinates.y + n])
-    }
-  };
-
-
-
-
-
-
-
-  return result;
 }
 
 
-function getNextCellState(params: {coordinates: Coordinates; cells: CellState[][]}): CellState{
+
+
+function getNextCellState(
+  params: {coordinates: Coordinates; cells: CellState[][]}
+): CellState{
+
   const {coordinates, cells} = params;
   const isOnEdge: boolean = coordinates.x === 0 || coordinates.x === dimentions.width - 1 ||
                             coordinates.y === 0 || coordinates.y === dimentions.height - 1;
