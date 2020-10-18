@@ -8,20 +8,25 @@ type CellState = "dead" | "alive";
 
 
 export const dimentions = {
-  "width": 20,
-  "height": 20
+  "width": 40,
+  "height": 40
 }
 
 export type Store = {
   
   changeCellState: (coordinates: Coordinates) => Promise<void>;
-  runGame: () => void;
+  nextState: () => Promise<void>;
   getCellAtCoord: (coordinates: Coordinates) => CellState;
   cleanGrid: ()=> Promise<void>;
+  runGame: ()=> Promise<void>;
+  stopGame: ()=>void;
   
 
   evtGridCleaned: NonPostableEvt<CellState[][]>;
   evtCellStateChanged: NonPostableEvt<Coordinates>;
+  evtIsGameRuning: NonPostableEvt<boolean>;
+ 
+
 
 };
 
@@ -97,14 +102,17 @@ export async function getStore(): Promise<Store>{
     };
   };
 
+  let isGameRuning = false;
 
   const store: ToPostableEvt<Store> = {
     "cleanGrid": async ()=>{
       await simulateNetworkDelay(300);
 
-      cells.forEach(line =>{
-        line.forEach(cell => cell = "dead");
-      });
+      for(let x = 0; x < dimentions.width; x++){
+        for(let y = 0; y <dimentions.height; y++){
+          cells[x][y] = "dead";
+        }
+      }
 
       store.evtGridCleaned.post(cells);
 
@@ -124,7 +132,10 @@ export async function getStore(): Promise<Store>{
 
 
     },
-    "runGame": ()=>{
+    "nextState": async ()=>{
+      
+      await simulateNetworkDelay(200);
+      
       const changedCells: {cellState: CellState; coordinates: Coordinates}[] = [];
       
       cells.forEach((line, x) => line.forEach((cell, y) =>{
@@ -144,9 +155,32 @@ export async function getStore(): Promise<Store>{
       });
     },
 
+    "runGame": async ()=>{
+      isGameRuning = true;
+      store.evtIsGameRuning.post(isGameRuning);
+      const interval = setInterval(() =>{
+        if(!isGameRuning){
+          clearInterval(interval);
+        }
+        store.nextState();
+      },500)
+    },
+    "stopGame": ()=> {
+      isGameRuning = false;
+      store.evtIsGameRuning.post(isGameRuning)
+    },
+
     "evtCellStateChanged": new Evt(),
-    "evtGridCleaned": new Evt()
+    "evtGridCleaned": new Evt(),
+    "evtIsGameRuning": new Evt(),
+
+    
   };
+
+  [
+    store.evtCellStateChanged,
+    store.evtGridCleaned,
+  ].map(evt=> evt.setMaxHandlers(Infinity));
 
   await simulateNetworkDelay(1500);
 

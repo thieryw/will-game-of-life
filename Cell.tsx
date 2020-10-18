@@ -1,11 +1,12 @@
 import React, { Component, useCallback, useReducer } from 'react';
 import { render } from 'react-dom';
 import './style.css';
-import {useAsync} from "react-async-hook";
+import {useAsyncCallback} from "react-async-hook";
 import {Store, Coordinates} from "./logic";
 import {useEvt} from "evt/hooks";
 import {Evt} from "evt";
 import { same } from "evt/tools/inDepth";
+import { Spinner } from "./Spinner";
 
 
 export const Cell: React.FunctionComponent<{
@@ -21,11 +22,10 @@ export const Cell: React.FunctionComponent<{
   const [, forceUpdate] = useReducer(x=>x+1, 0);
 
   const handleClick = useCallback(()=>{
-    store.changeCellState({
-      "x": coordinates.x,
-      "y": coordinates.y
-    })
-  },[store])
+    asyncHandleClick.execute(coordinates);
+  },[store]);
+
+  const asyncHandleClick = useAsyncCallback(store.changeCellState);
 
   useEvt(ctx =>{
     store.evtCellStateChanged.attach(
@@ -42,6 +42,9 @@ export const Cell: React.FunctionComponent<{
       className={`cell ${store.getCellAtCoord(coordinates)}`}
       onClick={handleClick}
     >
+      {
+        asyncHandleClick.loading ? <Spinner /> : ""
+      }
 
 
     </div>
