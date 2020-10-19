@@ -9,8 +9,8 @@ type CellState = "dead" | "alive";
 
 
 export const dimentions = {
-  "width": 40,
-  "height": 40
+  "width": 10,
+  "height": 10
 }
 
 export type Store = {
@@ -31,89 +31,61 @@ export type Store = {
 
 };
 
-function getAllCellsInContactWithCell(params: {coordinates: Coordinates; cells: CellState[][]}): CellState[]{
-  
-  const {coordinates, cells} = params;
-  
-  //100% spagety
 
-  const getCellsInContact = (
-    params: {yAbove: number, yBeneath: number, xLeft: number, xRight: number}
-  )=>{
-    const result: CellState[] = [];
-    const {yAbove, yBeneath, xLeft, xRight} = params;
-    for(const n of [yAbove, 0, yBeneath]){
-      result.push(cells[coordinates.x + xLeft][coordinates.y + n]);
-      result.push(cells[coordinates.x + xRight][coordinates.y + n]);
+function getNextCellState(params: {coordinates: Coordinates, cellStates: CellState[][]}): CellState{
+  const {coordinates, cellStates} = params;
+  const cellState = cellStates[coordinates.x][coordinates.y];
 
-      if(n === yAbove || n === yBeneath){
-        result.push(cells[coordinates.x][coordinates.y + n]);
-      }
-    };
-
-    return result;
-  }
-
-  /*if(coordinates.x === 0){
-    if(coordinates.y === 0){
-            
-      return getCellsInContact(
-        {"xLeft": 1, "xRight": dimentions.width, "yAbove": 1, "yBeneath": dimentions.height}
-      );
-    }
-
-    if(coordinates.y === dimentions.height - 1){
-
-      return getCellsInContact(
-        {"xLeft": 1, "xRight": dimentions.width, "yAbove": 1, "yBeneath": -dimentions.height}
-      );
-    }
-
-
-  }*/
-  
-
-  return getCellsInContact(
-        {"xLeft": -1, "xRight": 1, "yAbove": -1, "yBeneath": 1}
-      );
-
-}
-
-
-
-
-function getNextCellState(
-  params: {coordinates: Coordinates; cells: CellState[][]}
-): CellState{
-
-  const {coordinates, cells} = params;
-  const isOnEdge: boolean = coordinates.x === 0 || coordinates.x === dimentions.width - 1 ||
-                            coordinates.y === 0 || coordinates.y === dimentions.height - 1;
-  
-  let result: CellState;
-  let numberOfLiveCellsInContact = 0;
-  if(isOnEdge){
+  if(coordinates.x === 0 || coordinates.x === dimentions.width - 1 || 
+    coordinates.y === 0 || coordinates.y === dimentions.height - 1
+  ){
     return "dead";
   }
-  const cellsInContact = getAllCellsInContactWithCell(params);
 
-  cellsInContact.forEach(cell => {
-    if(cell === "alive"){
-      numberOfLiveCellsInContact++;
+  const cellsArroundCell = (()=>{
+    const out: CellState[] = [];
+
+    for(const n of [1, 0, -1]){
+      out.push(cellStates[coordinates.x - 1][coordinates.y + n]);
+      out.push(cellStates[coordinates.x + 1][coordinates.y + n]);
+      if(n === 1 || n === -1){
+        out.push(cellStates[coordinates.x][coordinates.y + n]);
+      }
     }
+
+    return out;
+  })();
+
+  let numberOfLiveCellsAroundCell = 0;
+
+  cellsArroundCell.forEach(cellState =>{
+    if(cellState === "dead"){
+      
+      return;
+    }
+
+    numberOfLiveCellsAroundCell++;
   });
 
+  
 
-  switch(cells[coordinates.x][coordinates.y]){
-    case "alive" : result = numberOfLiveCellsInContact < 2 || numberOfLiveCellsInContact > 3 ? 
-                            "dead" : "alive"; break;
-    
-    case "dead" : result = numberOfLiveCellsInContact === 3 ? "alive" : "dead"; break;
+  if(cellState === "alive"){
+    if(numberOfLiveCellsAroundCell < 2 || numberOfLiveCellsAroundCell > 3){
+      return "dead";
+    }
+    return "alive";
   }
 
-  return result;
+  if(cellState === "dead"){
+    if(numberOfLiveCellsAroundCell === 3){
+      return "alive";
 
-}
+    }
+    return "dead";
+  }
+} 
+
+
 
 
 export async function getStore(): Promise<Store>{
@@ -163,23 +135,25 @@ export async function getStore(): Promise<Store>{
     "nextState": async ()=>{
       
       await simulateNetworkDelay(200);
-      
-      const changedCells: {cellState: CellState; coordinates: Coordinates}[] = [];
-      
-      cells.forEach((line, x) => line.forEach((cell, y) =>{
-        
-        const nextCellState = getNextCellState({"cells": cells, "coordinates": {x,y}});
-        
-        if(nextCellState !== cell){
+      const newCells: {coodinates: Coordinates, cellState: CellState}[] = [];
+      cells.forEach((line, x)=> {
+        line.forEach((cellState, y)=>{
+          const nextCellState = getNextCellState({"cellStates": cells, "coordinates":{x,y}});
 
-         changedCells.push({"cellState": nextCellState, "coordinates": {x,y}});
-        }
-      }));
+          if(cellState === nextCellState){
+            return;
+          }
+
+          newCells.push({"cellState": nextCellState, "coodinates": {x,y}});
+
+        });
+      });
 
 
-      changedCells.forEach(cell => {
-        cells[cell.coordinates.x][cell.coordinates.y] = cell.cellState;
-        store.evtCellStateChanged.post(cell.coordinates);
+
+      newCells.forEach(newCell =>{
+        cells[newCell.coodinates.x][newCell.coodinates.y] = newCell.cellState;
+        store.evtCellStateChanged.post({"x": newCell.coodinates.x, "y": newCell.coodinates.y});
       });
     },
 

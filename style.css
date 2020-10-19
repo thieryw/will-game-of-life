@@ -17,7 +17,7 @@ body{
 
 .cells{
   display: grid;
-  grid-template-columns: repeat(40, 1fr);
+  grid-template-columns: repeat(10, 1fr);
   grid-gap: 1px;
   background-color: black;
   border: black solid 1px;
@@ -36,12 +36,12 @@ body{
     width: 95vw;
   }
   .cell{
-    height: 2.5vw !important;
+    height: 10vw !important;
   }
 }
 
 .cell{
-  height: 17px;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
