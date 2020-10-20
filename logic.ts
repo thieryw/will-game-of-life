@@ -76,13 +76,13 @@ function getNextCellState(params: {coordinates: Coordinates, cellStates: CellSta
     return "alive";
   }
 
-  if(cellState === "dead"){
-    if(numberOfLiveCellsAroundCell === 3){
-      return "alive";
+ 
+  if(numberOfLiveCellsAroundCell === 3){
+    return "alive";
 
-    }
-    return "dead";
   }
+  return "dead";
+  
 } 
 
 
