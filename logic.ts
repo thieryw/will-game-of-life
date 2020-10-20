@@ -1,4 +1,4 @@
-import {NonPostableEvt, ToPostableEvt, Evt} from "evt";
+import {NonPostableEvt, ToPostableEvt, Evt, StatefulReadonlyEvt} from "evt";
 import { Cell } from "./Cell";
 
 export type Coordinates = {
@@ -9,8 +9,8 @@ type CellState = "dead" | "alive";
 
 
 export const dimentions = {
-  "width": 40,
-  "height": 40
+  "width": 20,
+  "height": 20
 }
 
 export type Store = {
@@ -25,49 +25,135 @@ export type Store = {
 
   evtGridCleaned: NonPostableEvt<CellState[][]>;
   evtCellStateChanged: NonPostableEvt<Coordinates>;
-  evtIsGameRuning: NonPostableEvt<boolean>;
+  evtIsGameRuning: StatefulReadonlyEvt<boolean>;
  
 
 
 };
+
+function getNumberOfLiveCellsAroundCell(
+  params: {coordinates: Coordinates, cellStates: CellState[][]}
+):number{
+  const {coordinates, cellStates} = params;
+
+ 
+
+  const getResult = (params: {above: number; beneath: number; left: number; right: number})=>{
+    const {above, beneath, left, right} = params;
+    let out = 0;
+    for(const n of([left, 0, right])){
+      if(out > 3){
+        return out;
+      }
+
+      if(cellStates[coordinates.x + above][coordinates.y + n] === "alive") out++;
+      if(cellStates[coordinates.x + beneath][coordinates.y + n] === "alive") out++;
+
+      if(n === left || n === right){
+        if(cellStates[coordinates.x][coordinates.y + n] === "alive") out++;
+      }
+    }
+
+    return out;
+  }
+
+
+  if(coordinates.x === 0){
+    
+    if(coordinates.y === 0){
+      
+      return getResult({
+        "above": dimentions.height -1,
+        "beneath": 1,
+        "left": dimentions.width - 1,
+        "right": 1
+      });
+    }
+
+    if(coordinates.y === dimentions.width - 1){
+      return getResult({
+        "above": dimentions.height - 1,
+        "beneath": 1,
+        "left": -1,
+        "right": -dimentions.width + 1
+      });
+    }
+
+    return getResult({
+      "above": dimentions.height - 1,
+      "beneath": 1,
+      "left": -1,
+      "right": 1
+    });
+  }
+
+  if(coordinates.x === dimentions.height - 1){
+    
+    if(coordinates.y === 0){
+      return getResult({
+        "above": -1,
+        "beneath": -dimentions.height+1,
+        "left": dimentions.width - 1,
+        "right": 1,
+      });
+    }
+    if(coordinates.y === dimentions.width - 1){
+      return getResult({
+        "above": -1,
+        "beneath": -dimentions.height + 1,
+        "left": -1,
+        "right": -dimentions.width + 1
+      });
+    }
+
+    return getResult({
+      "above": -1,
+      "beneath": -dimentions.height + 1,
+      "left": -1,
+      "right": 1
+    });
+  }
+
+
+  if(coordinates.y === 0){
+    return getResult(
+      {
+        "above": -1,
+        "beneath": 1,
+        "left": dimentions.width -1,
+        "right": 1
+      }
+    )
+  }
+
+  if(coordinates.y === dimentions.width - 1){
+    return getResult(
+      {
+        "above": -1,
+        "beneath": 1,
+        "left": -1,
+        "right": -dimentions.width + 1
+      }
+    )
+  }
+
+
+  return getResult(
+    {
+      "above": -1,
+      "beneath": 1,
+      "left": -1,
+      "right": 1
+    }
+  )
+}
 
 
 function getNextCellState(params: {coordinates: Coordinates, cellStates: CellState[][]}): CellState{
   const {coordinates, cellStates} = params;
   const cellState = cellStates[coordinates.x][coordinates.y];
 
-  if(coordinates.x === 0 || coordinates.x === dimentions.width - 1 || 
-    coordinates.y === 0 || coordinates.y === dimentions.height - 1
-  ){
-    return "dead";
-  }
-
-  const cellsArroundCell = (()=>{
-    const out: CellState[] = [];
-
-    for(const n of [1, 0, -1]){
-      out.push(cellStates[coordinates.x - 1][coordinates.y + n]);
-      out.push(cellStates[coordinates.x + 1][coordinates.y + n]);
-      if(n === 1 || n === -1){
-        out.push(cellStates[coordinates.x][coordinates.y + n]);
-      }
-    }
-
-    return out;
-  })();
-
-  let numberOfLiveCellsAroundCell = 0;
-
-  cellsArroundCell.forEach(cellState =>{
-    if(cellState === "dead"){
-      
-      return;
-    }
-
-    numberOfLiveCellsAroundCell++;
-  });
-
-  
+  const numberOfLiveCellsAroundCell = getNumberOfLiveCellsAroundCell(params);
 
   if(cellState === "alive"){
     if(numberOfLiveCellsAroundCell < 2 || numberOfLiveCellsAroundCell > 3){
@@ -102,7 +188,7 @@ export async function getStore(): Promise<Store>{
     };
   };
 
-  let isGameRuning = false;
+  
 
   const store: ToPostableEvt<Store> = {
     "cleanGrid": async ()=>{
@@ -158,23 +244,24 @@ export async function getStore(): Promise<Store>{
     },
 
     "runGame": async ()=>{
-      isGameRuning = true;
-      store.evtIsGameRuning.post(isGameRuning);
+      
+      store.evtIsGameRuning.state = true;
       const interval = setInterval(() =>{
-        if(!isGameRuning){
+        if(!store.evtIsGameRuning.state){
           clearInterval(interval);
+          return;
         }
         store.nextState();
-      },500)
+      },200)
     },
     "stopGame": ()=> {
-      isGameRuning = false;
-      store.evtIsGameRuning.post(isGameRuning)
+      
+      store.evtIsGameRuning.state = false;
     },
 
     "evtCellStateChanged": new Evt(),
     "evtGridCleaned": new Evt(),
-    "evtIsGameRuning": new Evt(),
+    "evtIsGameRuning": Evt.create(false),
 
     
   };
