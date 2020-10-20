@@ -1,4 +1,4 @@
-import React, { Component, useCallback, useReducer, useMemo } from 'react';
+import React, { Component, useCallback, useReducer, useMemo, useEffect, useState } from 'react';
 import { render } from 'react-dom';
 import './style.css';
 import {useAsyncCallback} from "react-async-hook";
@@ -16,6 +16,7 @@ export const App: React.FunctionComponent<{
 }> = (props)=>{
   const {store} = props;
   const [, forceUpdate] = useReducer(x=>x+1, 0);
+  
 
   const allCoordinates = useMemo(()=>{
     const out: Coordinates[] = [];
@@ -43,7 +44,7 @@ export const App: React.FunctionComponent<{
   
   return (
     <div className="wrapper">
-      <h1>Game of Life</h1>
+      <h1>Game Of Life</h1>
       <div className="cells">
         {
           allCoordinates.map(coordinates => <Cell key={JSON.stringify(coordinates)} 

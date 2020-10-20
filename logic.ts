@@ -188,6 +188,12 @@ export async function getStore(): Promise<Store>{
     };
   };
 
+  cells[9][9] = "alive";
+  cells[10][9] = "alive";
+  cells[11][9] = "alive";
+  cells[11][8] = "alive";
+  cells[10][7] = "alive";
+
   
 
   const store: ToPostableEvt<Store> = {

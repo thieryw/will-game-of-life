@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useCallback } from 'react';
 import { render } from 'react-dom';
 import './style.css';
 import {useAsync} from "react-async-hook";
@@ -11,6 +11,7 @@ import {App} from "./App";
 const Switcher: React.FunctionComponent = ()=>{
   
   const asyncGetStore = useAsync(getStore, []);
+  
   
   
   return(
