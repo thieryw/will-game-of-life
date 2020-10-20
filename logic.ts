@@ -9,8 +9,8 @@ type CellState = "dead" | "alive";
 
 
 export const dimentions = {
-  "width": 10,
-  "height": 10
+  "width": 40,
+  "height": 40
 }
 
 export type Store = {
