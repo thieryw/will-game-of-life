@@ -1,6 +1,6 @@
 import React, { Component, useCallback, useReducer, useMemo, useState } from 'react';
 import { render } from 'react-dom';
-import './style.css';
+import "./Buttons.scss";
 import {useAsyncCallback} from "react-async-hook";
 import {Store, Coordinates} from "../../logic";
 import {useEvt, useStatefulEvt} from "evt/hooks";
@@ -42,25 +42,25 @@ import {dimentions} from "../../logic";
             asyncCleanGrid.loading
           } 
           value={asyncNextState.loading ? "Loading..." : "Next State"} 
-          onClick={useCallback(()=> asyncNextState.execute(),[store])} 
+          onClick={asyncNextState.execute} 
         />
         <input 
           type="button" 
           disabled={store.evtIsGameRuning.state || asyncCleanGrid.loading}
           value="Run Game"
-          onClick={useCallback(()=> store.runGame(),[store])} 
+          onClick={store.runGame} 
         />
         <input
           type="button"
           value="Stop Game"
           disabled={asyncCleanGrid.loading || !store.evtIsGameRuning.state}
-          onClick={useCallback(()=> store.stopGame(), [store])}
+          onClick={store.stopGame}
         />
         <input
           type="button"
           value={asyncCleanGrid.loading ? "Loading..." : "Clean Grid"}
           disabled={asyncCleanGrid.loading || store.evtIsGameRuning.state}
-          onClick={useCallback(()=> asyncCleanGrid.execute(), [store])}
+          onClick={asyncCleanGrid.execute}
         />
       </div>
     )

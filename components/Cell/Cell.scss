@@ -1,0 +1,27 @@
+
+body{
+  .cell{
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    @media screen and(max-width: 700px){
+      height: 5vw !important;
+    }
+    &.dead{
+      background-color: white;
+    }
+    &.alive{
+      background-color: green;
+    }
+  }
+}
+  
+
+
+
+
+
+
+

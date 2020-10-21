@@ -1,6 +1,6 @@
 import React, { Component, useCallback, useReducer, useMemo, useEffect, useState } from 'react';
 import { render } from 'react-dom';
-import './style.css';
+import "./App.scss";
 import {useAsyncCallback} from "react-async-hook";
 import {Store, Coordinates} from "../../logic";
 import {useEvt} from "evt/hooks";

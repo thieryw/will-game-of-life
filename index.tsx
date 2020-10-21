@@ -1,6 +1,6 @@
 import React, { Component, useCallback, useEffect } from 'react';
 import { render } from 'react-dom';
-import './style.css';
+import './style.scss';
 import {useAsync} from "react-async-hook";
 import {Store, getStore} from "./logic";
 
