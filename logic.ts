@@ -1,5 +1,5 @@
 import {NonPostableEvt, ToPostableEvt, Evt, StatefulReadonlyEvt} from "evt";
-import { Cell } from "./Cell";
+
 
 export type Coordinates = {
   x: number;

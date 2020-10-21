@@ -2,11 +2,11 @@ import React, { Component, useCallback, useReducer } from 'react';
 import { render } from 'react-dom';
 import './style.css';
 import {useAsyncCallback} from "react-async-hook";
-import {Store, Coordinates} from "./logic";
+import {Store, Coordinates} from "../../logic";
 import {useEvt} from "evt/hooks";
 import {Evt} from "evt";
 import { same } from "evt/tools/inDepth";
-import { Spinner } from "./Spinner";
+import { Spinner } from "../Spinner";
 
 
 export const Cell: React.FunctionComponent<{

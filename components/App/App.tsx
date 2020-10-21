@@ -2,13 +2,13 @@ import React, { Component, useCallback, useReducer, useMemo, useEffect, useState
 import { render } from 'react-dom';
 import './style.css';
 import {useAsyncCallback} from "react-async-hook";
-import {Store, Coordinates} from "./logic";
+import {Store, Coordinates} from "../../logic";
 import {useEvt} from "evt/hooks";
 import {Evt} from "evt";
-import {Cell} from "./Cell";
-import {dimentions} from "./logic";
+import {Cell} from "../Cell/Cell";
+import {dimentions} from "../../logic";
 
-import {Buttons} from "./Buttons";
+import {Buttons} from "../Buttons/Buttons";
 
 
 export const App: React.FunctionComponent<{

@@ -1,10 +1,10 @@
-import React, { Component, useCallback } from 'react';
+import React, { Component, useCallback, useEffect } from 'react';
 import { render } from 'react-dom';
 import './style.css';
 import {useAsync} from "react-async-hook";
 import {Store, getStore} from "./logic";
 
-import {App} from "./App";
+import {App} from "./components/App/App";
 
 
 
@@ -12,7 +12,15 @@ const Switcher: React.FunctionComponent = ()=>{
   
   const asyncGetStore = useAsync(getStore, []);
   
-  
+  useEffect(()=>{
+    return ()=>{
+      if(asyncGetStore.loading){
+        return;
+      }
+
+      asyncGetStore.result.stopGame();
+    }
+  },[])
   
   return(
     <div>

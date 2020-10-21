@@ -2,11 +2,11 @@ import React, { Component, useCallback, useReducer, useMemo, useState } from 're
 import { render } from 'react-dom';
 import './style.css';
 import {useAsyncCallback} from "react-async-hook";
-import {Store, Coordinates} from "./logic";
+import {Store, Coordinates} from "../../logic";
 import {useEvt, useStatefulEvt} from "evt/hooks";
 import {Evt} from "evt";
-import {Cell} from "./Cell";
-import {dimentions} from "./logic";
+import {Cell} from "../Cell/Cell";
+import {dimentions} from "../../logic";
 
 
 
